@@ -100,6 +100,9 @@ pub struct Message {
     pub(super) item: syn::ImplItemFn,
     /// If the ink! message can receive funds.
     is_payable: bool,
+    /// If it is allowed to re-enter the corresponding ink! message. If reentrancy is disabled by default,
+    /// this flag can be used to enable it for a specific message.
+    allow_reentrancy: bool,
     /// If the ink! message is default.
     is_default: bool,
     /// An optional user provided selector.
@@ -187,6 +190,7 @@ impl Message {
                 match arg.kind() {
                     ir::AttributeArg::Message
                     | ir::AttributeArg::Payable
+                    | ir::AttributeArg::AllowReentrancy
                     | ir::AttributeArg::Default
                     | ir::AttributeArg::Selector(_) => Ok(()),
                     _ => Err(None),
@@ -205,10 +209,12 @@ impl TryFrom<syn::ImplItemFn> for Message {
         Self::ensure_not_return_self(&method_item)?;
         let (ink_attrs, other_attrs) = Self::sanitize_attributes(&method_item)?;
         let is_payable = ink_attrs.is_payable();
+        let allow_reentrancy = ink_attrs.allow_reentrancy();
         let is_default = ink_attrs.is_default();
         let selector = ink_attrs.selector();
         Ok(Self {
             is_payable,
+            allow_reentrancy,
             is_default,
             selector,
             item: syn::ImplItemFn {
@@ -245,6 +251,10 @@ impl Callable for Message {
 
     fn is_payable(&self) -> bool {
         self.is_payable
+    }
+
+    fn allow_reentrancy(&self) -> bool {
+        self.allow_reentrancy
     }
 
     fn is_default(&self) -> bool {

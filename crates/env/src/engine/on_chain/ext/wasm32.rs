@@ -163,6 +163,8 @@ mod sys {
         ) -> ReturnCode;
 
         pub fn call_runtime(call_ptr: Ptr32<[u8]>, call_len: u32) -> ReturnCode;
+
+        pub fn reentrance_count() -> ReturnCode;
     }
 
     #[link(wasm_import_module = "seal1")]
@@ -602,6 +604,11 @@ pub fn ecdsa_to_eth_address(pubkey: &[u8; 33], output: &mut [u8; 20]) -> Result 
         sys::ecdsa_to_eth_address(Ptr32::from_slice(pubkey), Ptr32Mut::from_slice(output))
     };
     ret_code.into()
+}
+
+pub fn reentrance_count() -> u32 {
+    let ret_code = unsafe { sys::reentrance_count() };
+    ret_code.into_u32()
 }
 
 pub fn sr25519_verify(

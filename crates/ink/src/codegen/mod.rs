@@ -23,6 +23,7 @@ pub mod utils;
 pub use self::{
     dispatch::{
         deny_payment,
+        deny_reentrancy,
         ContractCallBuilder,
         DispatchInput,
         DispatchOutput,
@@ -37,6 +38,7 @@ pub use self::{
         TraitCallForwarder,
         TraitCallForwarderFor,
         TraitMessagePayable,
+        TraitMessageReentrant,
         TraitMessageSelector,
     },
 };

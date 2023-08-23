@@ -388,6 +388,11 @@ pub fn sr25519_verify(
     ret_code.into()
 }
 
+pub fn reentrance_count() -> u32 {
+    let ret_val = sys::call0(FUNC_ID);
+    ret_val.into_u32()
+}
+
 pub fn is_contract(account_id: &[u8]) -> bool {
     let ret_val = sys::call(FUNC_ID, Ptr32::from_slice(account_id));
     ret_val.into_bool()

@@ -288,6 +288,12 @@ impl InkAttribute {
             .any(|arg| matches!(arg.kind(), AttributeArg::Payable))
     }
 
+    /// Returns `true` if the ink! attribute contains the `allow_reentrancy` argument.
+    pub fn allow_reentrancy(&self) -> bool {
+        self.args()
+            .any(|arg| matches!(arg.kind(), AttributeArg::AllowReentrancy))
+    }
+
     /// Returns `true` if the ink! attribute contains the `default` argument.
     pub fn is_default(&self) -> bool {
         self.args()
@@ -356,6 +362,8 @@ pub enum AttributeArgKind {
     Constructor,
     /// `#[ink(payable)]`
     Payable,
+    /// `#[ink(allow_reentrancy)]`
+    AllowReentrancy,
     /// `#[ink(default)]`
     Default,
     /// `#[ink(selector = _)]`
@@ -406,6 +414,11 @@ pub enum AttributeArg {
     /// Applied on ink! constructors or messages in order to specify that they
     /// can receive funds from callers.
     Payable,
+    /// `#[ink(allow_reentrancy)]`
+    ///
+    /// Applied on ink! constructors or messages in order to indicate
+    /// they are reentrant.
+    AllowReentrancy,
     /// Applied on ink! constructors or messages in order to indicate
     /// they are default.
     Default,
@@ -457,6 +470,7 @@ impl core::fmt::Display for AttributeArgKind {
             Self::Message => write!(f, "message"),
             Self::Constructor => write!(f, "constructor"),
             Self::Payable => write!(f, "payable"),
+            Self::AllowReentrancy => write!(f, "allow_reentrancy"),
             Self::Selector => {
                 write!(f, "selector = S:[u8; 4] || _")
             }
@@ -483,6 +497,7 @@ impl AttributeArg {
             Self::Message => AttributeArgKind::Message,
             Self::Constructor => AttributeArgKind::Constructor,
             Self::Payable => AttributeArgKind::Payable,
+            Self::AllowReentrancy => AttributeArgKind::AllowReentrancy,
             Self::Selector(_) => AttributeArgKind::Selector,
             Self::Extension(_) => AttributeArgKind::Extension,
             Self::Namespace(_) => AttributeArgKind::Namespace,
@@ -502,6 +517,7 @@ impl core::fmt::Display for AttributeArg {
             Self::Message => write!(f, "message"),
             Self::Constructor => write!(f, "constructor"),
             Self::Payable => write!(f, "payable"),
+            Self::AllowReentrancy => write!(f, "allow_reentrancy"),
             Self::Selector(selector) => core::fmt::Display::fmt(&selector, f),
             Self::Extension(extension) => {
                 write!(f, "extension = {:?}", extension.into_u32())
@@ -972,6 +988,7 @@ impl Parse for AttributeFrag {
                     "event" => Ok(AttributeArg::Event),
                     "anonymous" => Ok(AttributeArg::Anonymous),
                     "payable" => Ok(AttributeArg::Payable),
+                    "allow_reentrancy" => Ok(AttributeArg::AllowReentrancy),
                     "default" => Ok(AttributeArg::Default),
                     "impl" => Ok(AttributeArg::Implementation),
                     _ => match ident.to_string().as_str() {
@@ -1411,6 +1428,7 @@ mod tests {
                     constructor,
                     event,
                     payable,
+                    allow_reentrancy,
                     impl,
                 )]
             },
@@ -1420,6 +1438,7 @@ mod tests {
                 AttributeArg::Constructor,
                 AttributeArg::Event,
                 AttributeArg::Payable,
+                AttributeArg::AllowReentrancy,
                 AttributeArg::Implementation,
             ])),
         );
